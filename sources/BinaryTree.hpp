@@ -143,7 +143,7 @@ namespace ariel
             }
 
         public:
-            iteratorT(Node *ptr, string order) : currNode(ptr)
+            iteratorT(Node *ptr, string const& order) : currNode(ptr)
             {
                 if (order == "PostOrder")
                 {
@@ -157,8 +157,9 @@ namespace ariel
                 {
                     preOrderInitQ();
                 }
-                else 
+                else{
                     throw "Exception: invalid order traveler type!";
+                }
             }
 
             T &operator*() const { return currNode->data; }
@@ -210,7 +211,15 @@ namespace ariel
         {
             if (node != nullptr)
             {
-                cout << prefix <<  (isLeft ? "├──" :"└──");
+                cout << prefix;
+                if (isLeft)
+                {
+                    cout << "├──";
+                }
+                else
+                {
+                    cout << "└──";
+                }
                 cout << node->data << endl;
                 // enter the next tree level - left and right branch
                 printBT(prefix + (isLeft ? "│   " : "    "), node->left, true);
@@ -239,10 +248,12 @@ namespace ariel
 
         BinaryTree &add_root(T order)
         {
-            (root ?
-                root->data = order 
-            : 
-                root = new Node{order});
+            if(root){
+                root->data = order;
+            }
+            else{
+                root = new Node{order};
+            }
             return *this;
         }
 
@@ -266,10 +277,12 @@ namespace ariel
                 throw invalid_argument("Exception: Node not found in the tree");
             }
 
-            (curr->left ? 
-                curr->left->data = v
-            :
-                curr->left = new Node{v});
+            if(curr->left){ 
+                curr->left->data = v;
+            }
+            else{
+                curr->left = new Node{v};
+            }
             return *this;
         }
 
@@ -288,14 +301,16 @@ namespace ariel
                     break;
                 }
             }
-            if (curr == nullptr ?)
+            if (curr == nullptr)
             {
                 throw invalid_argument("Exception: Node not found in the tree");
             }
-            (curr->right ?
-                curr->right->data = v
-            :
-                curr->right = new Node{v});
+            if(curr->right){
+                curr->right->data = v;
+            }
+            else{
+                curr->right = new Node{v};
+            }
             return *this;
         }
     };
