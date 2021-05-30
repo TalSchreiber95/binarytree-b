@@ -1,4 +1,4 @@
-
+#pragma once
 #include <iostream>
 #include <stack>
 #include <queue>
@@ -7,10 +7,6 @@ using namespace std;
 
 namespace ariel
 {
-    const int INORDER = 0;
-    const int PREORDER = 1;
-    const int POSTORDER = 2;
-
     template <typename T>
     class BinaryTree
     {
@@ -20,8 +16,10 @@ namespace ariel
             T data;
             Node *left;
             Node *right;
-            Node(const T &v) : data(v), left(nullptr), right(nullptr) {}
-
+            Node(const T &child) : data(child), left(nullptr), right(nullptr) {}
+            // Node's copy constructor
+            // Node(const Node<T> &n ) : data(n.data), left(n.left), right(n.right) {}
+            //Node's Distructor
             ~Node()
             {
                 delete left;
@@ -48,21 +46,20 @@ namespace ariel
                     return;
                 }
 
-                stack<Node *> s;
+                stack<Node *> stk;
                 Node *curr = currNode;
 
-                while (curr != nullptr || s.empty() == false)
+                while (curr != nullptr || !stk.empty())
                 {
                     while (curr != nullptr)
                     {
-                        s.push(curr);
+                        stk.push(curr);
                         curr = curr->left;
                     }
 
-                    curr = s.top();
+                    curr = stk.top();
+                    stk.pop();
                     it.push(curr);
-                    s.pop();
-
                     curr = curr->right;
                 }
 
@@ -77,22 +74,22 @@ namespace ariel
                 {
                     return;
                 }
-                stack<Node *> s;
-                s.push(currNode);
+                stack<Node *> stk;
+                stk.push(currNode);
 
-                while (!s.empty())
+                while (!stk.empty())
                 {
-                    Node *node = s.top();
+                    Node *node = stk.top();
                     it.push(node);
-                    s.pop();
+                    stk.pop();
 
                     if (node->right)
                     {
-                        s.push(node->right);
+                        stk.push(node->right);
                     }
                     if (node->left)
                     {
-                        s.push(node->left);
+                        stk.push(node->left);
                     }
                 }
 
@@ -143,7 +140,7 @@ namespace ariel
             }
 
         public:
-            iteratorT(Node *ptr, string const& order) : currNode(ptr)
+            iteratorT(Node *ptr, string const &order) : currNode(ptr)
             {
                 if (order == "PostOrder")
                 {
@@ -157,7 +154,8 @@ namespace ariel
                 {
                     preOrderInitQ();
                 }
-                else{
+                else
+                {
                     throw "Exception: invalid order traveler type!";
                 }
             }
@@ -194,18 +192,60 @@ namespace ariel
         };
 
         /*END OF CLASS ITERATOR*/
+        // BinaryTree& operator*() const { return this; }
 
         BinaryTree() : root(nullptr) {}
+        // Copy constructor
+        BinaryTree(BinaryTree<T> &bt) /*: root(bt.root)*/
+        {
+            root=new Node(bt.root->data);
+
+            // queue<Node *> it;
+            // cout<<"\nthe root's data: "<< root->data<<endl;
+            // if (root == nullptr)
+            // {
+            //     return;
+            // }
+
+            // stack<Node *> stk;
+            Node *curr = bt.root;
+            // Node *parent = nullptr;
+            // while (curr != nullptr || !stk.empty())
+            // {
+                while (curr!= nullptr)
+                {
+                    add_left(bt.root->data,bt.root->left->data);
+                    // curr=bt.root->left;
+            //         stk.push(curr);
+            //         parent = new Node(curr->data);
+                    curr = curr->left;
+                    // add_left_copyConstructor(parent->data,curr->data);
+                }
+                
+
+            //     curr = stk.top();
+            //     stk.pop();
+            //     it.push(curr);
+            //     curr = curr->right;
+            //     if (curr != nullptr)
+            //     {
+            //         // add_right_copyConstructor(parent->data,curr->data);
+            //     }
+            // }
+
+            // it.push(nullptr);
+            // root = it.front();
+            // it.pop();
+        }
+
         ~BinaryTree()
         {
             delete root;
         }
-        // Copy constructor
-        // BinaryTree(BinaryTree<T>& bt){ 
-        //     root=new Node();
-        //     root=bt.root;
+        // BinaryTree &operator=(BinaryTree other){
+        //     root=other.root;
         // }
-
+ 
         // Token from: https://stackoverflow.com/questions/36802354/print-binary-tree-in-a-pretty-way-using-c
         void printBT(const string &prefix, const Node *node, bool isLeft) const
         {
@@ -231,33 +271,36 @@ namespace ariel
 
         friend ostream &operator<<(ostream &os, const BinaryTree &b)
         {
-            os << "\nTal's binary Tree:\n" << endl;
+            os << "\nTal's binary Tree:\n"
+               << endl;
             // pass the root node of your binary tree
             b.printBT(b.root);
             return os;
         }
 
         iteratorT begin_preorder() const { return iteratorT(root, "PreOrder"); }
-        iteratorT end_preorder() const { return iteratorT(nullptr,"PreOrder"); }
+        iteratorT end_preorder() const { return iteratorT(nullptr, "PreOrder"); }
         iteratorT begin_inorder() const { return iteratorT(root, "InOrder"); }
-        iteratorT end_inorder() const { return iteratorT(nullptr,"InOrder"); }
+        iteratorT end_inorder() const { return iteratorT(nullptr, "InOrder"); }
         iteratorT begin_postorder() const { return iteratorT(root, "PostOrder"); }
-        iteratorT end_postorder() const { return iteratorT(nullptr,"PostOrder"); }
+        iteratorT end_postorder() const { return iteratorT(nullptr, "PostOrder"); }
         iteratorT begin() const { return begin_inorder(); }
         iteratorT end() const { return end_inorder(); }
 
         BinaryTree &add_root(T order)
         {
-            if(root){
+            if (root)
+            {
                 root->data = order;
             }
-            else{
+            else
+            {
                 root = new Node{order};
             }
             return *this;
         }
 
-        BinaryTree &add_left(T p, T v)
+        BinaryTree &add_left(T parent, T child)
         {
             if (root == nullptr)
             {
@@ -266,7 +309,7 @@ namespace ariel
             Node *curr = nullptr;
             for (auto i = begin_inorder(); i != end_inorder(); ++i)
             {
-                if (*i == p)
+                if (*i == parent)
                 {
                     curr = i.get_node();
                     break;
@@ -277,16 +320,41 @@ namespace ariel
                 throw invalid_argument("Exception: Node not found in the tree");
             }
 
-            if(curr->left){ 
-                curr->left->data = v;
+            if (curr->left)
+            {
+                curr->left->data = child;
             }
-            else{
-                curr->left = new Node{v};
+            else
+            {
+                curr->left = new Node{child};
             }
             return *this;
         }
+        BinaryTree &add_left_copyConstructor(T parent, T child)
+        {
+            //  if (root == nullptr)
+            // {
+            //     throw invalid_argument("Exception: No root found on this tree");
+            // }
+            // Node *curr = nullptr;
+            // for (auto i = begin_inorder(); i != end_inorder(); ++i)
+            // {
+            //     if (*i == parent)
+            //     {
+            //         curr = i.get_node();
+            //         break;
+            //     }
+            // }
+            // if (curr == nullptr)
+            // {
+            //     throw invalid_argument("Exception: Node not found in the tree");
+            // }
 
-        BinaryTree &add_right(T p, T v)
+            // curr->left = new Node{child};
+            return *this;
+        }
+
+        BinaryTree &add_right(T parent, T child)
         {
             if (root == nullptr)
             {
@@ -295,7 +363,7 @@ namespace ariel
             Node *curr = nullptr;
             for (auto i = begin_inorder(); i != end_inorder(); ++i)
             {
-                if (*i == p)
+                if (*i == parent)
                 {
                     curr = i.get_node();
                     break;
@@ -305,12 +373,37 @@ namespace ariel
             {
                 throw invalid_argument("Exception: Node not found in the tree");
             }
-            if(curr->right){
-                curr->right->data = v;
+            if (curr->right)
+            {
+                curr->right->data = child;
             }
-            else{
-                curr->right = new Node{v};
+            else
+            {
+                curr->right = new Node{child};
             }
+            return *this;
+        }
+        BinaryTree &add_right_copyConstructor(T parent, T child)
+        {
+            if (root == nullptr)
+            {
+                throw invalid_argument("Exception: No root found on this tree");
+            }
+            Node *curr = nullptr;
+            for (auto i = begin_inorder(); i != end_inorder(); ++i)
+            {
+                if (*i == parent)
+                {
+                    curr = i.get_node();
+                    break;
+                }
+            }
+            if (curr == nullptr)
+            {
+                throw invalid_argument("Exception: Node not found in the tree");
+            }
+
+            curr->right = new Node{child};
             return *this;
         }
     };
