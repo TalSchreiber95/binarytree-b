@@ -15,21 +15,21 @@ OBJECTS=$(subst sources/,objects/,$(subst .cpp,.o,$(SOURCES)))
 run: test1 test2 test3 test
 
 test1: TestRunner.o StudentTest1.o  $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $@ -g3
 
 test2: TestRunner.o StudentTest2.o  $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $@ -g3
 
 test3: TestRunner.o StudentTest3.o  $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $@ -g3
 
 # was add for tal's test
 test: TestRunner.o Test.o $(OBJECTS) #
-	$(CXX) $(CXXFLAGS) $^ -o $@  #
+	$(CXX) $(CXXFLAGS) $^ -o $@ -g3 #
 # should delete after it.
 
 demo: Demo.o $(OBJECTS) 
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o -g3 $@
 
 
 

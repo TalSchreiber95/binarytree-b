@@ -87,83 +87,136 @@ TEST_CASE("int Binary tree")
 TEST_CASE("char Binary tree")
 {
     BinaryTree<char> btChar;
-    CHECK_THROWS(btChar.add_right('t','C'));//there is no nodes in the tree
+    CHECK_THROWS(btChar.add_right('t', 'C')); //there is no nodes in the tree
     CHECK_NOTHROW(btChar.add_root('t'));
-    CHECK_NOTHROW(btChar.add_right('t','C'));
-    CHECK_NOTHROW(btChar.add_left('t','v'));
-    CHECK_NOTHROW(btChar.add_left('v','D'));
-    CHECK_NOTHROW(btChar.add_right('v','u'));
-    CHECK_THROWS(btChar.add_right('c','u')); // node doesn't exist
-    CHECK_THROWS(btChar.add_right('*','o')); // node doesn't exist
-    CHECK_THROWS(btChar.add_left('=','+')); // node doesn't exist
+    CHECK_NOTHROW(btChar.add_right('t', 'C'));
+    CHECK_NOTHROW(btChar.add_left('t', 'v'));
+    CHECK_NOTHROW(btChar.add_left('v', 'D'));
+    CHECK_NOTHROW(btChar.add_right('v', 'u'));
+    CHECK_THROWS(btChar.add_right('c', 'u')); // node doesn't exist
+    CHECK_THROWS(btChar.add_right('*', 'o')); // node doesn't exist
+    CHECK_THROWS(btChar.add_left('=', '+'));  // node doesn't exist
 
     SUBCASE("check the tree is correct")
     {
-        char arrPre[]={'t','v','D','u','C'};
-        char arrIn[]={'D','v','u','t','C'};
-        char arrPost[]={'D','u','v','C','t'};
-        int i=0;
-        for (auto it=btChar.begin_postorder(); it!=btChar.end_postorder(); it++) {
-            CHECK((*it)==arrPost[i]);
+        char arrPre[] = {'t', 'v', 'D', 'u', 'C'};
+        char arrIn[] = {'D', 'v', 'u', 't', 'C'};
+        char arrPost[] = {'D', 'u', 'v', 'C', 't'};
+        int i = 0;
+        for (auto it = btChar.begin_postorder(); it != btChar.end_postorder(); it++)
+        {
+            CHECK((*it) == arrPost[i]);
             i++;
         }
-        i=0;
-        for (auto it=btChar.begin_inorder(); it!=btChar.end_inorder(); it++) {
-            CHECK((*it)==arrIn[i]);
+        i = 0;
+        for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn[i]);
             i++;
         }
-        i=0;
-        for (auto it=btChar.begin_preorder(); it!=btChar.end_preorder(); it++) {
-            CHECK((*it)==arrPre[i]);
+        i = 0;
+        for (auto it = btChar.begin_preorder(); it != btChar.end_preorder(); it++)
+        {
+            CHECK((*it) == arrPre[i]);
             i++;
         }
     }
 
     SUBCASE("check override by add_right/add_left")
     {
-          CHECK_NOTHROW(btChar.add_root('a'));
-        CHECK_NOTHROW(btChar.add_left('a','b'));
+        CHECK_NOTHROW(btChar.add_root('a'));
+        CHECK_NOTHROW(btChar.add_left('a', 'b'));
 
-        CHECK_THROWS(btChar.add_left('A','0'));
-        CHECK_THROWS(btChar.add_left('B','6'));
+        CHECK_THROWS(btChar.add_left('A', '0'));
+        CHECK_THROWS(btChar.add_left('B', '6'));
 
-        char arrPre[]={'a','b','D','u','C'};
-        char arrIn[]={'D','b','u','a','C'};
-        char arrPost[]={'D','u','b','C','a'};
-        int i=0;
-            for (auto it=btChar.begin_postorder(); it!=btChar.end_postorder(); ++it) {
-                CHECK((*it)==arrPost[i]);
-                i++;
-            }
-            i=0;
-            for (const char& element: btChar) { 
-                CHECK(element==arrIn[i]);
-                i++;
-            }
-            i=0;
-            for (auto it=btChar.begin_preorder(); it!=btChar.end_preorder(); ++it) {
-                CHECK((*it)==arrPre[i]);
-                i++;
-            }
+        char arrPre[] = {'a', 'b', 'D', 'u', 'C'};
+        char arrIn[] = {'D', 'b', 'u', 'a', 'C'};
+        char arrPost[] = {'D', 'u', 'b', 'C', 'a'};
+        int i = 0;
+        for (auto it = btChar.begin_postorder(); it != btChar.end_postorder(); ++it)
+        {
+            CHECK((*it) == arrPost[i]);
+            i++;
+        }
+        i = 0;
+        for (const char &element : btChar)
+        {
+            CHECK(element == arrIn[i]);
+            i++;
+        }
+        i = 0;
+        for (auto it = btChar.begin_preorder(); it != btChar.end_preorder(); ++it)
+        {
+            CHECK((*it) == arrPre[i]);
+            i++;
+        }
     }
-    SUBCASE("check copy constructor")
+    SUBCASE("check copy constructor and =operator")
     {
-        cout<< "\nstarting to check copy constructor\n";
+        cout << "\nstarting to check copy constructor\n";
+        char arrIn2[] = {'D', 'v', 'u', 't', 'C'};
         BinaryTree<char> *btCharCopy = new BinaryTree(btChar);
-        cout<< "\nthe original tree \n";
+        cout << "\nthe original tree \n";
         CHECK_NOTHROW(cout << btChar << endl);
-        cout<< "\nthe copy constructor tree \n";
+        int i = 0;
+        for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn2[i]);
+            i++;
+        }
+        cout << "\nthe copy constructor tree \n";
         CHECK_NOTHROW(cout << *btCharCopy << endl);
-        // cout<<"\n adding to the original tree\n"<<endl;
-        // CHECK_NOTHROW(btChar.add_left('t','m'));        
-        // cout<< "\nthe original tree \n";
-        // CHECK_NOTHROW(cout << btChar << endl);
-        // cout<< "\nthe copy constructor tree \n";
-        // CHECK_NOTHROW(cout << *btCharCopy << endl);
-        cout<< "\nending to check copy constructor\n";
-
-
+        i = 0;
+        for (auto it = btCharCopy->begin_inorder(); it != btCharCopy->end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn2[i]);
+            i++;
+        }
+        i = 0;
+        cout << "\n adding to the original tree\n"
+             << endl;
+        CHECK_NOTHROW(btChar.add_left('t', 'm'));
+        CHECK_NOTHROW(btChar.add_left('m', 'N'));
+        char arrIn3[] = {'N', 'm', 'u', 't', 'C'};
+        for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn3[i]);
+            i++;
+        }
+        cout << "\nthe copy constructor tree \n";
+        i = 0;
+        for (auto it = btCharCopy->begin_inorder(); it != btCharCopy->end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn2[i]);
+            i++;
+        }
+        cout << "\nthe original tree \n";
+        CHECK_NOTHROW(cout << btChar << endl);
+        cout << "\nthe copy constructor tree \n";
+        CHECK_NOTHROW(cout << *btCharCopy << endl);
+        cout << "\nending to check copy constructor\n";
+        BinaryTree<char> btChar2;
+        CHECK_NOTHROW(btChar2 = btChar);
+        CHECK_NOTHROW(cout << btChar2 << endl);
+        CHECK_NOTHROW(btChar.add_left('m', 'z'));
+        cout<< " start";
+        CHECK_NOTHROW(cout << btChar << endl);
+        CHECK_NOTHROW(cout << btChar2 << endl);
+        char arrIn4[] = {'z', 'm', 'u', 't', 'C'};
+        i=0;
+        for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn4[i]);
+            i++;
+        }
+        cout << "\nthe copy constructor tree \n";
+        i = 0;
+        for (auto it = btChar2.begin_inorder(); it != btChar2.end_inorder(); it++)
+        {
+            CHECK((*it) == arrIn3[i]);
+            i++;
+        }
+       
     }
-
-    // CHECK_NOTHROW(cout << btChar << endl);
 }
