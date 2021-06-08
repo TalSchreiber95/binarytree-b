@@ -15,10 +15,10 @@ namespace ariel
 
         struct Node
         {
-            T data;
+            T info;
             Node *left = nullptr;
             Node *right = nullptr;
-            Node(T child) : data(child), left(nullptr), right(nullptr) {}
+            Node(T inf) : info(inf), left(nullptr), right(nullptr) {}
         };
         Node *root = nullptr;
 
@@ -29,31 +29,31 @@ namespace ariel
         // Token from: https://stackoverflow.com/questions/10412385/binary-tree-copy-constructor
         void copy(Node *&fRoot, Node *&oRoot)
         {
-            if (oRoot == NULL)
+            if (oRoot == nullptr)
             {
-                fRoot = NULL;
+                fRoot = nullptr;
             }
             else
             {
-                fRoot = new Node(oRoot->data);
+                fRoot = new Node(oRoot->info);
                 copy(fRoot->left, oRoot->left);
                 copy(fRoot->right, oRoot->right);
             }
         }
 
         //Copy constractor
-        BinaryTree<T>(BinaryTree<T> &other)
+        BinaryTree<T>(BinaryTree<T> &o)
         {
-            if (other.root == NULL)
+            if (o.root != nullptr)
             {
-                root = NULL;
+                copy(root, o.root);
             }
             else
             {
-                copy(root, other.root);
+                root = nullptr;
             }
         }
-        //distractor
+        //destructor
         ~BinaryTree<T>()
         {
             if (root != nullptr)
@@ -62,41 +62,39 @@ namespace ariel
             }
         }
         //move =
-        BinaryTree<T> &operator=(BinaryTree<T> &&other) noexcept
+        BinaryTree<T> &operator=(BinaryTree<T> &&o) noexcept
         {
             delete root;
-            root = other.root;
-            other.root = nullptr;
+            root = o.root;
+            o.root = nullptr;
         }
         //move constractor
-        BinaryTree<T>(BinaryTree<T> &&other) noexcept
+        BinaryTree<T>(BinaryTree<T> &&o) noexcept
         {
-            root = other.root;
-            other.root = nullptr;
+            root = o.root;
+            o.root = nullptr;
         }
         //= operator
-        BinaryTree<T> &operator=(BinaryTree<T> other)
+        BinaryTree<T> &operator=(BinaryTree<T> o) // const & other
         {
-            if (this == &other)
+            if (this != &o)
             {
+                delete root;
+                root = new Node(o.root->info);
+                copy(root, o.root);
                 return *this;
             }
-            delete root;
-            root = new Node(other.root->data);
-            copy(this->root, other.root);
             return *this;
         }
 
-        BinaryTree<T> &add_root(const T &data)
+        BinaryTree<T> &add_root(const T &info)
         {
-            if (root == nullptr)
+            if (root != nullptr)
             {
-                root = new Node(data);
+                root->info = info;
+                return *this;
             }
-            else
-            {
-                root->data = data;
-            }
+            root = new Node(info);
             return *this;
         }
 
@@ -104,14 +102,14 @@ namespace ariel
         {
             if (root == nullptr)
             {
-                throw(string) "Exception: root doesn't exist";
+                throw "Exception: root doesn't exist";
             }
             stack<Node *> stk;
             Node *curr = root;
             while (curr != nullptr || !stk.empty())
             {
-
-                while (curr != NULL)
+                // extreme left
+                while (curr != nullptr)
                 {
                     stk.push(curr);
                     curr = curr->left;
@@ -119,7 +117,7 @@ namespace ariel
 
                 curr = stk.top();
                 stk.pop();
-                if (curr->data == parent)
+                if (curr->info == parent)
                 {
                     if (curr->left == nullptr)
                     {
@@ -127,33 +125,33 @@ namespace ariel
                     }
                     else
                     {
-                        curr->left->data = child;
+                        curr->left->info = child;
                     }
                     return *this;
                 }
                 curr = curr->right;
             }
-            throw invalid_argument{"Exception: Node doesn't exist"};
+            throw "Exception: Node doesn't exist";
         }
 
         BinaryTree<T> &add_right(const T &parent, const T &child)
         {
             if (root == nullptr)
             {
-                throw(string) "Exception: root doesn't exist";
+                throw "Exception: root doesn't exist";
             }
             stack<Node *> stk;
             Node *curr = root;
             while (curr != nullptr || !stk.empty())
             {
-                while (curr != NULL)
+                while (curr != nullptr)
                 {
                     stk.push(curr);
                     curr = curr->left;
                 }
                 curr = stk.top();
                 stk.pop();
-                if (curr->data == parent)
+                if (curr->info == parent)
                 {
                     if (curr->right == nullptr)
                     {
@@ -161,13 +159,13 @@ namespace ariel
                     }
                     else
                     {
-                        curr->right->data = child;
+                        curr->right->info = child;
                     }
                     return *this;
                 }
                 curr = curr->right;
             }
-            throw invalid_argument{"Exception: Node doesn't exist"};
+            throw "Exception: Node doesn't exist";
         }
 
         class iterator
@@ -175,22 +173,22 @@ namespace ariel
 
         private:
             stack<Node *> stk;
-            string Order;
+            list<Node *> tmplist;
+            string travelType;
             Node *currNode;
-            list<Node *> PostList;
 
         public:
-            iterator(string const &order, Node *ptr = nullptr) : currNode(ptr)
+            iterator(string const &tType, Node *ptr = nullptr) : currNode(ptr)
             {
-                Order = order;
+                travelType = tType;
                 if (currNode != nullptr)
                 {
-                    if (order == "PreOrder")
+                    if (travelType == "PreOrder")
                     { //preorder
                         initStackPreOrder();
                     }
                     //inorder
-                    else if (order == "InOrder")
+                    else if (travelType == "InOrder")
                     {
                         initStackInOrder();
                     }
@@ -225,49 +223,49 @@ namespace ariel
             {
                 while (currNode != nullptr || !stk.empty())
                 {
-                    if (currNode != nullptr)
-                    {
-                        stk.push(currNode);
-                        currNode = currNode->left;
-                    }
-                    else
+                    if (currNode == nullptr)
                     {
                         Node *temp = stk.top()->right;
-                        if (temp == nullptr)
+                        if (temp != nullptr)
+                        {
+                            currNode = temp;
+                        }
+                        else
                         {
                             temp = stk.top();
                             stk.pop();
-                            PostList.push_back(temp);
+                            tmplist.push_back(temp);
                             while (!stk.empty() && temp == stk.top()->right)
                             {
                                 temp = stk.top();
                                 stk.pop();
-                                PostList.push_back(temp);
+                                tmplist.push_back(temp);
                             }
                         }
-                        else
-                        {
-                            currNode = temp;
-                        }
+                    }
+                    else
+                    {
+                        stk.push(currNode);
+                        currNode = currNode->left;
                     }
                 }
-                currNode = PostList.front();
-                PostList.pop_front();
+                currNode = tmplist.front();
+                tmplist.pop_front();
             }
             T &operator*() const
             {
-                return currNode->data;
+                return currNode->info;
             }
 
             T *operator->() const
             {
-                return &(currNode->data);
+                return &(currNode->info);
             }
 
             // ++i;
             iterator &operator++()
             {
-                if (Order == "PreOrder")
+                if (travelType == "PreOrder")
                 {
                     if (stk.empty())
                     {
@@ -286,12 +284,15 @@ namespace ariel
                         stk.push(currNode->left);
                     }
                 }
-                else if (Order == "InOrder")
+                else if (travelType == "InOrder")
                 {
-                    if (!stk.empty() || currNode->right != nullptr)
+                    if (currNode->right == nullptr && stk.empty())
+                    {
+                        currNode = nullptr;
+                    }
+                    else
                     {
                         currNode = currNode->right;
-
                         while (currNode != nullptr)
                         {
                             stk.push(currNode);
@@ -300,21 +301,17 @@ namespace ariel
                         currNode = stk.top();
                         stk.pop();
                     }
-                    else
-                    {
-                        currNode = nullptr;
-                    }
                 }
                 else
                 {
-                    if (PostList.size() != 0)
+                    if (tmplist.size() == 0)
                     {
-                        currNode = PostList.front();
-                        PostList.pop_front();
+                        currNode = nullptr;
                     }
                     else
                     {
-                        currNode = nullptr;
+                        currNode = tmplist.front();
+                        tmplist.pop_front();
                     }
                 }
                 return *this;
@@ -323,17 +320,16 @@ namespace ariel
             // i++;
             iterator operator++(int)
             {
-                iterator tmpIT = *this;
-                if (Order == "PreOrder")
+                iterator it = *this;
+                if (travelType == "PreOrder")
                 {
                     if (stk.empty())
                     {
                         currNode = nullptr;
-                        return tmpIT;
+                        return it;
                     }
                     currNode = stk.top();
                     stk.pop();
-
                     if (currNode->right != nullptr)
                     {
                         stk.push(currNode->right);
@@ -343,12 +339,15 @@ namespace ariel
                         stk.push(currNode->left);
                     }
                 }
-                else if (Order == "InOrder")
+                else if (travelType == "InOrder")
                 {
-                    if (!stk.empty() || currNode->right != nullptr)
+                    if (currNode->right == nullptr && stk.empty())
+                    {
+                        currNode = nullptr;
+                    }
+                    else
                     {
                         currNode = currNode->right;
-
                         while (currNode != nullptr)
                         {
                             stk.push(currNode);
@@ -357,34 +356,30 @@ namespace ariel
                         currNode = stk.top();
                         stk.pop();
                     }
-                    else
-                    {
-                        currNode = nullptr;
-                    }
                 }
                 else
                 {
-                    if (PostList.size() != 0)
-                    {
-                        currNode = PostList.front();
-                        PostList.pop_front();
-                    }
-                    else
+                    if (tmplist.size() == 0)
                     {
                         currNode = nullptr;
                     }
+                    else
+                    {
+                        currNode = tmplist.front();
+                        tmplist.pop_front();
+                    }
                 }
-                return tmpIT;
+                return it;
             }
 
-            bool operator==(const iterator &other) const
+            bool operator==(const iterator &o) const
             {
-                return currNode == other.currNode;
+                return currNode == o.currNode;
             }
 
-            bool operator!=(const iterator &other) const
+            bool operator!=(const iterator &o) const
             {
-                return currNode != other.currNode;
+                return currNode != o.currNode;
             }
         };
 
@@ -420,7 +415,7 @@ namespace ariel
         {
             return iterator("InOrder", nullptr);
         }
-        
+
         // Token from : https://stackoverflow.com/questions/36802354/print-binary-tree-in-a-pretty-way-using-c
         void printBT(const string &prefix, const Node *node, bool isLeft) const
         {
@@ -435,7 +430,7 @@ namespace ariel
                 {
                     cout << "└──";
                 }
-                cout << node->data << endl;
+                cout << node->info << endl;
                 // enter the next tree level - left and right branch
                 printBT(prefix + (isLeft ? "│   " : "    "), node->right, false);
                 printBT(prefix + (isLeft ? "│   " : "    "), node->left, true);

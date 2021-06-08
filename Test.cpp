@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <stdlib.h>
 #include "doctest.h"
 using namespace std;
 
@@ -152,7 +153,7 @@ TEST_CASE("char Binary tree")
             i++;
         }
     }
-    SUBCASE("check copy constructor and =operator")
+    SUBCASE("check copy constructor and operator=")
     {
         cout << "\nstarting to check copy constructor\n";
         char arrIn2[] = {'D', 'v', 'u', 't', 'C'};
@@ -179,44 +180,80 @@ TEST_CASE("char Binary tree")
         CHECK_NOTHROW(btChar.add_left('t', 'm'));
         CHECK_NOTHROW(btChar.add_left('m', 'N'));
         char arrIn3[] = {'N', 'm', 'u', 't', 'C'};
+        cout << "\nchecking the original tree:";
         for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
         {
             CHECK((*it) == arrIn3[i]);
             i++;
         }
-        cout << "\nthe copy constructor tree \n";
+        cout<< ": Successed!";
+        cout << "\nchecking the copy constructor tree";
         i = 0;
         for (auto it = btCharCopy->begin_inorder(); it != btCharCopy->end_inorder(); it++)
         {
             CHECK((*it) == arrIn2[i]);
             i++;
         }
+        cout<< ": Successed!\n";
         cout << "\nthe original tree \n";
         CHECK_NOTHROW(cout << btChar << endl);
         cout << "\nthe copy constructor tree \n";
         CHECK_NOTHROW(cout << *btCharCopy << endl);
         cout << "\nending to check copy constructor\n";
         BinaryTree<char> btChar2;
+        cout<< endl<<"-------------------------------------------\nstart checking operator="<<endl;
         CHECK_NOTHROW(btChar2 = btChar);
-        CHECK_NOTHROW(cout << btChar2 << endl);
-        CHECK_NOTHROW(btChar.add_left('m', 'z'));
-        cout<< " start";
+        cout << "\nthe original tree \n";
         CHECK_NOTHROW(cout << btChar << endl);
+        cout << "\nthe copy tree\n";
+        CHECK_NOTHROW(cout << btChar2 << endl);
+        cout << "\nadding to the original tree\n";
+        CHECK_NOTHROW(btChar.add_left('m', 'z'));
+        cout << "\nthe original tree \n";
+        CHECK_NOTHROW(cout << btChar << endl);
+        cout << "\nthe copy tree\n";
         CHECK_NOTHROW(cout << btChar2 << endl);
         char arrIn4[] = {'z', 'm', 'u', 't', 'C'};
         i=0;
+        cout << "\nchecking the original tree";
         for (auto it = btChar.begin_inorder(); it != btChar.end_inorder(); it++)
         {
             CHECK((*it) == arrIn4[i]);
             i++;
         }
-        cout << "\nthe copy constructor tree \n";
+        cout<< ": Successed!";
+        cout << "\nchecking the copy tree";
         i = 0;
         for (auto it = btChar2.begin_inorder(); it != btChar2.end_inorder(); it++)
         {
             CHECK((*it) == arrIn3[i]);
             i++;
         }
+        cout<< ": Successed!\n";
+        cout << "\nending to check operator=\n-------------------------------------------\n";
        
     }
+}
+TEST_CASE("checking add random float values to a big tree")
+{
+    cout << "\nchecking add random float values to a big tree ( 100x100 ) ";
+    BinaryTree<float> bigbt;
+    CHECK_NOTHROW(bigbt.add_root(2.3));
+    srand(23);
+    float a=2.3,b=rand(),c=rand();
+    CHECK_NOTHROW(bigbt.add_left(a,b));
+    CHECK_NOTHROW(bigbt.add_right(a,c));
+    for(int i= 0 ;i<100;i++)
+    {
+        a=b;
+        b=rand();
+        CHECK_NOTHROW(bigbt.add_left(a,b));
+        for(int j=0;j<100;j++){
+            a=c;
+            c=rand();
+            CHECK_NOTHROW(bigbt.add_right(a,c));
+        }
+    }
+        cout<< ": Successed!\n";
+
 }
